@@ -4,7 +4,7 @@ This is my fork of the PiCar-4WD for UIUC MCS's CS 437: Internet of Things cours
 
 Here, I will list a number modifications I've made to the original source code:
 
-### Inerting Keyboard Control
+### Inverting Keyboard Control
 
 `examples/keyboard_control.py` mysteriously turns right when I hit `a` and left when I hit `d`. I don't think this is expected behavior but even if it is, I have modified this script to toggle inversion and turn right when right and left when left.
 
