@@ -2,11 +2,13 @@ import picar_4wd as fc
 import sys
 import tty
 import termios
-import asyncio
 
 power_val = 50
-key = 'status'
-print("If you want to quit.Please press q")
+invert_turns = True  # Flag to invert turn directions, True by default
+
+print("If you want to quit, please press q")
+print("Press 'i' to toggle turn inversion")
+
 def readchar():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
@@ -28,36 +30,42 @@ def readkey(getchar_fn=None):
     c3 = getchar()
     return chr(0x10 + ord(c3) - 65)
 
-def Keyborad_control():
+def Keyboard_control():
+    global power_val, invert_turns
     while True:
-        global power_val
-        key=readkey()
-        if key=='6':
-            if power_val <=90:
+        key = readkey()
+        if key == '6':
+            if power_val <= 90:
                 power_val += 10
-                print("power_val:",power_val)
-        elif key=='4':
-            if power_val >=10:
+                print("power_val:", power_val)
+        elif key == '4':
+            if power_val >= 10:
                 power_val -= 10
-                print("power_val:",power_val)
-        if key=='w':
+                print("power_val:", power_val)
+        
+        if key == 'w':
             fc.forward(power_val)
-        elif key=='a':
-            fc.turn_left(power_val)
-        elif key=='s':
+        elif key == 's':
             fc.backward(power_val)
-        elif key=='d':
-            fc.turn_right(power_val)
+        elif key == 'a':
+            if invert_turns:
+                fc.turn_right(power_val)
+            else:
+                fc.turn_left(power_val)
+        elif key == 'd':
+            if invert_turns:
+                fc.turn_left(power_val)
+            else:
+                fc.turn_right(power_val)
+        elif key == 'i':
+            invert_turns = not invert_turns
+            print("Turn inversion:", "ON" if invert_turns else "OFF")
         else:
             fc.stop()
-        if key=='q':
-            print("quit")  
-            break  
+        
+        if key == 'q':
+            print("Quitting")
+            break
+
 if __name__ == '__main__':
-    Keyborad_control()
-
-
-
-
-
-
+    Keyboard_control()
