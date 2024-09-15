@@ -4,7 +4,7 @@ import picar_4wd as fc
 MAX_ANGLE = 90
 MIN_ANGLE = -90
 STEP_ANGLE = 5
-ANGLE_LIST = list(range(MIN_ANGLE, MAX_ANGLE + STEP_ANGLE, STEP_ANGLE))[-1::-1]
+ANGLE_LIST = list(range(MIN_ANGLE, MAX_ANGLE + STEP_ANGLE, STEP_ANGLE))
 MAX_MAPPING_DIST = 20
 
 def scan_dist(direct=0):
@@ -40,11 +40,11 @@ def interpolate(mapping, point1, point2):
     for step in range(1, steps):
         x = int(round(x1 + step * x_i))
         y = int(round(y1 + step * y_i))
-        if 0 <= x < mapping.shape[0] and 0 <= y < mapping.shape[1]:
-            mapping[x][y] = 1  
+        if 0 <= x < mapping.shape[1] and 0 <= y < mapping.shape[0]:
+            mapping[y][x] = 1  # row x column
 
 def map_obj(mapping, car_position, dist):
-    dist_clip = np.clip(dist, a_min=0, a_max=2**31-1)  
+    dist_clip = np.clip(dist, a_min=0, a_max=MAX_MAPPING_DIST)
 
     angles_in_rad = np.deg2rad(np.array(ANGLE_LIST))  
     
@@ -58,23 +58,23 @@ def map_obj(mapping, car_position, dist):
     # Map each obstacle point
     for point in obj_xy:
         x = point[0] + car_x
-        y = car_y - point[1]  
-        if 0 <= x < mapping.shape[0] and 0 <= y < mapping.shape[1] and not (x == car_x and y == car_y):
-            mapping[x][y] = 1 # mark as obstacle
+        y = car_y + point[1]
+        if 0 <= x < mapping.shape[1] and 0 <= y < mapping.shape[0]:
+            mapping[y][x] = 1  # row x column
             obstacle_points.append((x, y))
 
     for i in range(1, len(obstacle_points)):
         point1 = obstacle_points[i - 1]
         point2 = obstacle_points[i]
         interpolate(mapping, point1, point2)
-
     return mapping
 
 def main():
-    mapping = np.zeros((MAX_MAPPING_DIST + 1, 2 * MAX_MAPPING_DIST + 1), dtype=int)
-    car_pos = (MAX_MAPPING_DIST, MAX_MAPPING_DIST)  
+    mapping = np.zeros((MAX_MAPPING_DIST * 2, MAX_MAPPING_DIST * 2), dtype=int)
 
-    dist = np.array(scan_dist(direct=1))  
+    car_pos = [MAX_MAPPING_DIST, 0]  # Car at (max(x)/2, 0), facing up the Y axis
+
+    dist = np.array(scan_dist(direct=0))  
     mapping = map_obj(mapping, car_pos, dist)  
 
     print("Distance Readings:", list(dist))
