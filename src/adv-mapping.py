@@ -10,6 +10,7 @@ STEP_ANGLE = 5
 ANGLE_LIST = list(range(MIN_ANGLE, MAX_ANGLE + STEP_ANGLE, STEP_ANGLE))
 MAX_MAPPING_DIST = 50  # in cm
 OUTPUT_FOLDER = "maps"
+VISUALIZE_MAP = False
 
 def scan_dist(direct=0):
     angles = ANGLE_LIST if direct else ANGLE_LIST[::-1] 
@@ -36,7 +37,7 @@ def interpolate(mapping, point1, point2):
         if 0 <= x < mapping.shape[1] and 0 <= y < mapping.shape[0]:
             mapping[y][x] = 1  # row x column
 
-def map_obj(mapping, car_pos, dist):
+def map_obj(mapping, car_pos, dist, visualize = False):
     dist_clip = np.clip(dist, a_min=0, a_max=MAX_MAPPING_DIST)
 
     angles_in_rad = np.deg2rad(np.array(ANGLE_LIST))
@@ -62,7 +63,7 @@ def map_obj(mapping, car_pos, dist):
         point2 = obstacle_points[i]
         interpolate(mapping, point1, point2)
         
-    visualize_map(mapping, car_pos, obj_xy)
+    if visualize: visualize_map(mapping, car_pos, obj_xy)
     
     return mapping
 
@@ -105,7 +106,7 @@ def main():
     
     dist = np.array(scan_dist(direct=0))
     
-    mapping = map_obj(mapping, car_pos, dist)
+    mapping = map_obj(mapping, car_pos, dist, VISUALIZE_MAP)
 
     print("Distance Readings:", list(dist))
     
