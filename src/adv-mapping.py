@@ -8,19 +8,8 @@ ANGLE_LIST = list(range(MIN_ANGLE, MAX_ANGLE + STEP_ANGLE, STEP_ANGLE))
 MAX_MAPPING_DIST = 20
 
 def scan_dist(direct=0):
-    if direct: # left to right
-        angles = iter(ANGLE_LIST)
-    else:      # right to left  
-        angles = iter(ANGLE_LIST[-1::-1])
-    
-    ret = list()
-    for a in angles:
-        ret.append(fc.get_distance_at(a))
-    assert(len(ret) == len(ANGLE_LIST))
-    
-    if direct == 0:
-        ret.reverse()  # always return dist from left to right
-    
+    angles = ANGLE_LIST if direct else ANGLE_LIST[::-1] 
+    ret = [fc.get_distance_at(a) for a in angles] 
     return ret
 
 def interpolate(mapping, point1, point2):
