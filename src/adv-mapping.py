@@ -48,10 +48,12 @@ def map_obj(mapping, car_pos, dist):
     
     obstacle_points = []
     
+    height, width = mapping.shape
+        
     for point in obj_xy:
         x = point[0] + car_x
         y = car_y + point[1] # changed to + to place obstacles in front of the car
-        if 0 <= x < mapping.shape[1] and 0 <= y < mapping.shape[0]:
+        if 0 <= x < width and 0 <= y < height:
             mapping[y][x] = 1  # row x column
             obstacle_points.append((x, y))
 
