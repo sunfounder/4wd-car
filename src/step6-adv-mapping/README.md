@@ -1,13 +1,13 @@
 
 ## Table of Contents
 
-- [[#Advanced Mapping Script (Step 6 of Car Lab)|Advanced Mapping Script (Step 6 of Car Lab)]]
-	- [[#Advanced Mapping Script (Step 6 of Car Lab)#Mapping|Mapping]]
-		- [[#Mapping#`main()` → `map_obj()`|`main()` → `map_obj()`]]
-		- [[#Mapping#`map_obj()`|`map_obj()`]]
-		- [[#Mapping#`map_obj()` → `interpolate()`|`map_obj()` → `interpolate()`]]
-		- [[#Mapping#`interpolate()` → `map_obj()` → `main()`|`interpolate()` → `map_obj()` → `main()`]]
-- [[#Footnotes|Footnotes]]
+- [Advanced Mapping Script (Step 6 of Car Lab)](#Advanced%20Mapping%20Script%20(Step%206%20of%20Car%20Lab))
+	- [Mapping](#Mapping)
+		- [`main()` → `map_obj()`](#%60main()%60%20%E2%86%92%20%60map_obj()%60)
+		- [`map_obj()`](#%60map_obj()%60)
+		- [`map_obj()` → `interpolate()`](#%60map_obj()%60%20%E2%86%92%20%60interpolate()%60)
+		- [`interpolate()` → `map_obj()` → `visualize_map()` → `main()`](#%60interpolate()%60%20%E2%86%92%20%60map_obj()%60%20%E2%86%92%20%60visualize_map()%60%20%E2%86%92%20%60main()%60)
+- [Footnotes](#Footnotes)
 
 ## Advanced Mapping Script (Step 6 of Car Lab)
 
