@@ -3,3 +3,5 @@ dist/
 examples/web/server/__pycache__/remote_control.cpython-311.pyc
 picar_4wd.egg-info/
 picar_4wd/__pycache__/
+*.png
+*__pycache__*

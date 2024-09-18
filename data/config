@@ -3,4 +3,4 @@ right_front_reverse = False
 left_rear_reverse = False
 right_rear_reverse = False
 ultrasonic_servo_offset = 0
-toggle_inversion = False
+toggle_inversion = True

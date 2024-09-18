@@ -23,11 +23,17 @@ left_rear_reverse = config.get('left_rear_reverse', default_value = False)
 right_rear_reverse = config.get('right_rear_reverse', default_value = False)    
 ultrasonic_servo_offset = int(config.get('ultrasonic_servo_offset', default_value = 0)) 
 
-# Init motors
-left_front = Motor(PWM("P13"), Pin("D4"), is_reversed=left_front_reverse) # motor 1
-right_front = Motor(PWM("P12"), Pin("D5"), is_reversed=right_front_reverse) # motor 2
-left_rear = Motor(PWM("P8"), Pin("D11"), is_reversed=left_rear_reverse) # motor 3
-right_rear = Motor(PWM("P9"), Pin("D15"), is_reversed=right_rear_reverse) # motor 4
+if config.get('toggle_inverse', default_value = False) == True:
+    right_front = Motor(PWM("P13"), Pin("D4"), is_reversed=left_front_reverse) # motor 1
+    left_front = Motor(PWM("P12"), Pin("D5"), is_reversed=right_front_reverse) # motor 2
+    right_rear = Motor(PWM("P8"), Pin("D11"), is_reversed=left_rear_reverse) # motor 3
+    left_rear = Motor(PWM("P9"), Pin("D15"), is_reversed=right_rear_reverse) # motor 4    
+else:
+    # Init motors
+    left_front = Motor(PWM("P13"), Pin("D4"), is_reversed=left_front_reverse) # motor 1
+    right_front = Motor(PWM("P12"), Pin("D5"), is_reversed=right_front_reverse) # motor 2
+    left_rear = Motor(PWM("P8"), Pin("D11"), is_reversed=left_rear_reverse) # motor 3
+    right_rear = Motor(PWM("P9"), Pin("D15"), is_reversed=right_rear_reverse) # motor 4
 
 # left_front_speed = Speed(12)
 # right_front_speed = Speed(16)
