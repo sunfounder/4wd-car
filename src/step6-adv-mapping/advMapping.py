@@ -9,12 +9,13 @@ MAX_ANGLE = 90
 MIN_ANGLE = -90
 STEP_ANGLE = 5
 ANGLE_LIST = list(range(MIN_ANGLE, MAX_ANGLE + STEP_ANGLE, STEP_ANGLE))
-MAX_MAPPING_DIST = 25  # in cm
+MAX_MAPPING_DIST = 5  # in cm
 OUTPUT_FOLDER = pyhere.here("src/maps")
 VISUALIZE_MAP = True
 
 def scan_dist(direct=0):
     angles = ANGLE_LIST if direct else ANGLE_LIST[::-1] 
+    print("Angles ", angles)
     ret = [fc.get_distance_at(a) for a in angles] 
     return ret
 
