@@ -1,12 +1,13 @@
 import sys
 import os
 
-current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Load the modules by crawling recursively through `src/`
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-print(current_dir)
+src_dir = os.path.abspath(os.path.join(script_dir, '..', 'src'))
 
-for root, dirs, files in os.walk(current_dir):
-    if "__init__.py" in files:  
+for root, dirs, files in os.walk(src_dir):
+    if "__init__.py" in files: 
         sys.path.append(root)
 
 from advMapping import scan_dist, map_obj
