@@ -1,9 +1,19 @@
-import time
-import numpy as np
-import picar_4wd as fc
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+print(current_dir)
+
+for root, dirs, files in os.walk(current_dir):
+    if "__init__.py" in files:  
+        sys.path.append(root)
 
 from advMapping import scan_dist, map_obj
 from a_star import *
+import picar_4wd as fc
+import time
+import numpy as np
 
 DIRECTIONS = ['W', 'N', 'E', 'S']
 FORWARD_SPEED = 8
