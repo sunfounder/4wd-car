@@ -2,6 +2,7 @@ import picar_4wd as fc
 import sys
 import tty
 import termios
+import keyboard_control as kc
 
 power_val = 50
 invert_turns = True  # Flag to invert turn directions, True by default
@@ -30,42 +31,5 @@ def readkey(getchar_fn=None):
     c3 = getchar()
     return chr(0x10 + ord(c3) - 65)
 
-def Keyboard_control():
-    global power_val, invert_turns
-    while True:
-        key = readkey()
-        if key == '6':
-            if power_val <= 90:
-                power_val += 10
-                print("power_val:", power_val)
-        elif key == '4':
-            if power_val >= 10:
-                power_val -= 10
-                print("power_val:", power_val)
-        
-        if key == 'w':
-            fc.forward(power_val)
-        elif key == 's':
-            fc.backward(power_val)
-        elif key == 'a':
-            if invert_turns:
-                fc.turn_right(power_val)
-            else:
-                fc.turn_left(power_val)
-        elif key == 'd':
-            if invert_turns:
-                fc.turn_left(power_val)
-            else:
-                fc.turn_right(power_val)
-        elif key == 'i':
-            invert_turns = not invert_turns
-            print("Turn inversion:", "ON" if invert_turns else "OFF")
-        else:
-            fc.stop()
-        
-        if key == 'q':
-            print("Quitting")
-            break
-
 if __name__ == '__main__':
-    Keyboard_control()
+    kc.Keyboard_control()

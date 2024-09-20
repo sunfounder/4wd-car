@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./picar_4wd",
+        "./src/step6-adv-mapping"
+    ]
+}
