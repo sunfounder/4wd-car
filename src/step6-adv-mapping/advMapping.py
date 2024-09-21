@@ -22,6 +22,10 @@ OBSTACLE_THRESHOLD = 20  # cm
 
 FORWARD_TIME = 0.5
 TURN_TIME = 0.5
+BACKWARD_TIME = 0.5
+
+# flag for inverting L/R directions
+INVERT_DIRECTIONS = False
 
 class SimpleSLAM:
     def __init__(self, map_size, resolution):
@@ -130,38 +134,46 @@ def main():
             dist, angles = scan_dist(direct=0, debug=DEBUG_MODE, step_angle=STEP_ANGLE)
             slam.update_map(dist, angles, visualize=VISUALIZE_MAP)
             
-            # clip the distance to the max mapping distance 
             dist = np.clip(dist, a_min=0, a_max=MAX_MAPPING_DIST)
             
-            # get the distance of the left, forward, and right sectors
             left_sector = dist[:len(dist)//3]
             forward_sector = dist[len(dist)//3:2*len(dist)//3]
             right_sector = dist[2*len(dist)//3:]
             
-            # get the average distance of the left, forward, and right sectors
             avg_left = sum(left_sector) / len(left_sector)
             avg_forward = sum(forward_sector) / len(forward_sector)
             avg_right = sum(right_sector) / len(right_sector)
             
+            print(f"Average distances - Left: {avg_left:.2f}, Forward: {avg_forward:.2f}, Right: {avg_right:.2f}")
+            
             if avg_forward < OBSTACLE_THRESHOLD:
                 if avg_left > avg_right:
-                    print("Obstacle ahead, turning left...")
-                    fc.turn_left(30)
-                    time.sleep(TURN_TIME)
-                    fc.stop()
-                    slam.update_position(0, math.pi/4)
+                    turn_direction = "right" if INVERT_DIRECTIONS else "left"
                 else:
-                    print("Obstacle ahead, turning right...")
-                    fc.turn_right(30)
+                    turn_direction = "left" if INVERT_DIRECTIONS else "right"
+                
+                if avg_left < OBSTACLE_THRESHOLD and avg_right < OBSTACLE_THRESHOLD and avg_forward < OBSTACLE_THRESHOLD:
+                    print("Boxed in, backing up...")
+                    fc.backward(30)
+                    time.sleep(BACKWARD_TIME)
+                    fc.stop()
+                    slam.update_position(-10, 0)
+                else:
+                    print(f"Obstacle ahead, turning {turn_direction}...")
+                    if turn_direction == "left":
+                        fc.turn_left(30)
+                        slam.update_position(0, math.pi/4)
+                    else:
+                        fc.turn_right(30)
+                        slam.update_position(0, -math.pi/4)
                     time.sleep(TURN_TIME)
                     fc.stop()
-                    slam.update_position(0, -math.pi/4) 
             else:
                 print("Moving forward")
                 fc.forward(30)
                 time.sleep(FORWARD_TIME)
                 fc.stop()
-                slam.update_position(10, 0)      
+                slam.update_position(10, 0)    
     except KeyboardInterrupt:
         print("Program stopped by user")
     finally:
