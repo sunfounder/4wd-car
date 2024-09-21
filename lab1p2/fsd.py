@@ -6,13 +6,14 @@ import signal
 import numpy as np
 import multiprocessing as mp
 
+import picar_4wd as fc
 from a_star import *
 from mapping import scan_dist, map_obj
 
 MODE = 'legacy'
 
 if MODE=='legacy':
-    import picar_4wd as fc
+    #import picar_4wd as fc
     import utils
     from tflite_support.task import core, vision, processor
 elif MODE=='picamera':
@@ -59,8 +60,10 @@ def cleanup(signum, frame):
     fc.stop()
     sys.exit(0)
 
-def update_diagram(diagram):
-    """ Map scan result to A star grid """
+def create_diagram():
+    """ Scan and map sresult to A star grid """
+    diagram = GridWithWeights(GRID_SIZE, GRID_SIZE)
+    
     dist = np.array(scan_dist(1))
     mapping = map_obj(dist)
     
@@ -72,27 +75,39 @@ def update_diagram(diagram):
         walls.append(wall)
 
     diagram.walls = walls
+    return diagram
 
-def auto_drive(start, goal, car, stop_sign_event, drive_done_event):
-    """ Main driving logic """
-    diagram = GridWithWeights(GRID_SIZE, GRID_SIZE)
-    # To replace with adv mapping
-    #diagram.walls = [(1, 7), (1, 8), (2, 7), (2, 8), (3, 7), (3, 8)]
-#     diagram.walls = [(3, 2), (3, 3), (3, 4), (3, 5),
-#                       (4, 2), (4, 3), (4, 4), (4, 5)]
-    update_diagram(diagram)
-    
-    now_loc = start
+def create_route(diagram, now_loc, goal):
     came_from, cost_so_far = a_star_search(diagram, now_loc, goal)
     path = reconstruct_path(came_from, start=now_loc, goal=goal)
     draw_grid(diagram, point_to=came_from, start=now_loc, goal=goal)
     print()
     draw_grid(diagram, path=reconstruct_path(came_from, start=now_loc, goal=goal))
     
-    for spot in path[1:]:
-        car.move_to(spot)
-        now_loc = spot
-    
+    return path
+
+def auto_drive(start, goal, car, stop_sign_event, drive_done_event):
+    """ Main driving logic """
+    diagram = create_diagram()
+    path = create_route(diagram, start, goal)
+    cnt = 0
+    while tuple(car.loc) != goal:
+        cnt += 1
+        car.move_to(path[cnt])
+        
+        if tuple(car.loc) != path[cnt]:  # stop or turn
+            print(f"Car did not move to {path[cnt]} from {car.loc}, scan again")
+            # scan and add new walls
+        
+        # add walls without scan, to remove
+        if car.loc[1] == 7:
+            new_walls = [(7, 8), (8, 8), (9, 8)]
+            diagram.walls += new_walls
+            for w in new_walls:
+                if w in path:
+                    path = create_route(diagram, tuple(car.loc), goal)
+                    cnt = 0
+            
     drive_done_event.set()
     print('Auto drive complete')
 
