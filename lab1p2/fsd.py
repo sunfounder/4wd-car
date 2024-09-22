@@ -60,12 +60,9 @@ def cleanup(signum, frame):
     fc.stop()
     sys.exit(0)
 
-def create_diagram():
-    """ Scan and map sresult to A star grid """
-    diagram = GridWithWeights(GRID_SIZE, GRID_SIZE)
-    
+def scan_for_new_walls(car):
     dist = np.array(scan_dist(1))
-    mapping = map_obj(dist)
+    mapping = map_obj(dist, car.loc, car.direction)
     
     walls = list()
     for m in mapping:
@@ -73,9 +70,20 @@ def create_diagram():
         if wall in walls:
             continue
         walls.append(wall)
+    
+    return walls
 
-    diagram.walls = walls
+def create_diagram(car):
+    """ Scan and map sresult to A star grid """
+    diagram = GridWithWeights(GRID_SIZE, GRID_SIZE)
+    diagram.walls = scan_for_new_walls(car)
+    
     return diagram
+
+def update_diagram(diagram, new_walls):
+    for nw in new_walls:
+        if nw not in diagram.walls:
+            diagram.walls.append(nw)
 
 def create_route(diagram, now_loc, goal):
     came_from, cost_so_far = a_star_search(diagram, now_loc, goal)
@@ -88,25 +96,30 @@ def create_route(diagram, now_loc, goal):
 
 def auto_drive(start, goal, car, stop_sign_event, drive_done_event):
     """ Main driving logic """
-    diagram = create_diagram()
+    diagram = create_diagram(car)
     path = create_route(diagram, start, goal)
+    print(f"Route: {path}")
     cnt = 0
     while tuple(car.loc) != goal:
         cnt += 1
+        print(f"cnt={cnt}")
         car.move_to(path[cnt])
         
         if tuple(car.loc) != path[cnt]:  # stop or turn
             print(f"Car did not move to {path[cnt]} from {car.loc}, scan again")
             # scan and add new walls
-        
-        # add walls without scan, to remove
-        if car.loc[1] == 7:
-            new_walls = [(7, 8), (8, 8), (9, 8)]
-            diagram.walls += new_walls
+            new_walls = scan_for_new_walls(car)
+            update_diagram(diagram, new_walls)
+            print(f"Updated diagram")
+            draw_grid(diagram, start=tuple(car.loc), goal=goal)
+            cnt -= 1
             for w in new_walls:
-                if w in path:
+                if w in path[cnt:]:
+                    print(f"New wall {w} is in the route, rerouting")
                     path = create_route(diagram, tuple(car.loc), goal)
+                    print(f"New route: {path}")
                     cnt = 0
+                    break
             
     drive_done_event.set()
     print('Auto drive complete')
@@ -320,15 +333,19 @@ class Picar:
         
     
     def move_to(self, dest):
+        """ Move to dest, return early if stop sign or turning left/right """
         if self.stop_sign_event.is_set():
             print('Stop sign, wait for 3 seconds')
             fc.stop()
             time.sleep(3)
+            return
         
         print(f"at {self.loc}, moving to {dest}")
         direction, dist = get_direction_distance(self.loc, dest)
         
-        self.turn_to(direction)
+        if self.direction != direction:
+            self.turn_to(direction)
+            return
 
         print(f"move {dist}")
         fc.forward(FORWARD_SPEED)

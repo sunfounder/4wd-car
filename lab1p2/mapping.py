@@ -27,13 +27,14 @@ def scan_dist(direct=0):
 	
 	return ret
 	
-def map_obj(dist):
+def map_obj(dist, loc, direction):
 	dist_clip = np.clip(dist, a_min=0, a_max=2**31-1)  # processing sensor data, prune -1 and -2, cap to int32 max
 
 	angles_in_rad = np.array(ANGLE_LIST)*np.pi/180
 
-	obj_pos = dist_clip * np.array([np.sin(angles_in_rad), np.cos(angles_in_rad)])  # car pos is (0, 0)
+	obj_pos = dist_clip * np.array([-np.sin(angles_in_rad), np.cos(angles_in_rad)])  # car pos is (0, 0)
 	obj_xy = np.int32(np.round(obj_pos, 0))
+	obj_xy *= (abs(obj_xy) <= MAX_MAPPING_DIST)
 
 	#mapping = np.zeros((MAX_MAPPING_DIST+1, 2*MAX_MAPPING_DIST+1))  # car pos is (0, MAX_MAPPING_DIST)
 	mapping = list()
@@ -41,8 +42,15 @@ def map_obj(dist):
 	for i in range(len(ANGLE_LIST)):
 		x = obj_xy[0][i]
 		y = obj_xy[1][i]
-		if  np.abs(x)<=MAX_MAPPING_DIST and y<=MAX_MAPPING_DIST and not (x ==0 and y == 0):
-			mapping.append((x+MAX_MAPPING_DIST, y))
+		if x != 0 and y != 0:
+			if direction == 'S':
+				mapping.append((-x+loc[0]*10, y+loc[1]*10))
+			elif direction == 'N':
+				mapping.append((x+loc[0]*10, -y+loc[1]*10))
+			elif direction == 'E':
+				mapping.append((y+loc[0]*10, x+loc[1]*10))
+			else:  # West
+				mapping.append((-y+loc[0]*10, -x+loc[1]*10))
 			#mapping[MAX_MAPPING_DIST-y][x+MAX_MAPPING_DIST] = 1
 			#print(f"x={x+MAX_MAPPING_DIST}, y={MAX_MAPPING_DIST-y}")
 			
