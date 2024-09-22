@@ -185,11 +185,10 @@ def object_detection_legacy(stop_sign_event, drive_done_event, flip_frame=False,
             # this is the big piece needed for detection, 
             # most of the rest of this script is not new
             # =============================================================
-            for detection in detection_result.detections:
-                if detection.categories[0].category_name == "stop sign":
-                    print("Stop sign detected!")
-                    stop_sign_event.set()
-            
+            if any([detection.categories[0].category_name == "stop sign" for detection in detection_result.detections]):
+                print("Stop sign detected!")
+                stop_sign_event.set()
+                break
 
         # Calculate and display FPS
         if counter % fps_avg_frame_count == 0:
@@ -285,11 +284,10 @@ def object_detection_picamera(stop_sign_event, drive_done_event, flip_frame=Fals
             # this is the big piece needed for detection, 
             # most of the rest of this script is not new
             # =============================================================
-            for detection in detection_result:
-                if detection.categories[0].category_name == "stop sign":
-                    print("Stop sign detected!")
-                    stop_sign_event.set()
-
+            if any([detection.categories[0].category_name == "stop sign" for detection in detection_result]):
+                print("Stop sign detected!")
+                stop_sign_event.set()
+                break
 
             # Calculate and display FPS
             if counter % fps_avg_frame_count == 0:
@@ -338,6 +336,7 @@ class Picar:
             print('Stop sign, wait for 3 seconds')
             fc.stop()
             time.sleep(3)
+            self.stop_sign_event.clear()
             return
         
         print(f"at {self.loc}, moving to {dest}")
@@ -376,7 +375,10 @@ class Picar:
             fc.stop()
             
         else:
-            raise Exception(f"cannot turn from {self.direction} to {direction}")
+            print(f"turn 180 degree, from {self.direction} to {direction}")
+            fc.turn_left(TURN_SPEED)
+            time.sleep(2*TURN_TIME)
+            fc.stop()
 
         self.direction = direction
     
@@ -392,7 +394,6 @@ if __name__ == "__main__":
     drive_done_event = mp.Event()  # auto_drive_procees signals done driving to object_detection_process
 
     with Picar(list(start), stop_sign_event) as car:
-        #car.init_obj_detection()
         
         # Create the processes
         if MODE == 'legacy':
