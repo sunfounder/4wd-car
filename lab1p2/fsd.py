@@ -96,6 +96,7 @@ def create_route(diagram, now_loc, goal):
 
 def auto_drive(start, goal, car, stop_sign_event, drive_done_event):
     """ Main driving logic """
+    print(f"Car (A) starts at {start}, Destination (Z) at {goal}")
     diagram = create_diagram(car)
     path = create_route(diagram, start, goal)
     print(f"Route: {path}")
@@ -385,7 +386,15 @@ class Picar:
 
 if __name__ == "__main__":
 
-    start, goal = (GRID_SIZE//2, 0), (GRID_SIZE-1, GRID_SIZE-1)
+    goal = (GRID_SIZE-1, GRID_SIZE-1)
+    
+    try:
+        if sys.argv[1]:
+            goal = (0, GRID_SIZE-1)
+    except:
+        pass
+    
+    start = (GRID_SIZE//2, 0)
 
     signal.signal(signal.SIGINT, cleanup)
 
